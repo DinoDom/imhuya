@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        我是一颗小虎牙
 // @namespace   Violentmonkey Scripts
-// @version     0.5
+// @version     0.6
 // @icon        https://www.huya.com/favicon.ico
 // @match       *://www.huya.com/*
 // @author      Dino

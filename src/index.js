@@ -2,8 +2,6 @@ import globalCss from './style.css';
 
 const videoScale = 0.5625;
 let headerHeight;
-let contentWidth;
-let contentHeight;
 let showChat;
 let needSimplify;
 let autoBest;
@@ -31,11 +29,9 @@ let sendRecords;
 
 function init() {
   headerHeight = 59;
-  contentWidth = document.body.clientWidth - scrollbarWidth();//屏幕宽度减掉滚动条的宽度
   if (document.querySelector('.duya-header-wrap.clearfix')) {
     headerHeight = document.querySelector('.duya-header-wrap.clearfix').clientHeight;
   }
-  contentHeight = document.body.clientHeight - headerHeight;
   showChat = localStorage.getItem('showChat') === 'true';
 
   needSimplify = localStorage.getItem('needSimplify');
@@ -127,6 +123,7 @@ function simplifiedUI() {
   document.querySelector('#J_mainRoom').style.minWidth = '0px';
   document.querySelector('#J_mainWrap').style.padding = '0px';
 
+  unsafeWindow.onresize = openHideChat;
   openHideChat();
   document.querySelector('#J_mainWrap').style.backgroundColor = '#333';
   document.querySelector('.room-core').style.backgroundColor = '#333';
@@ -134,10 +131,6 @@ function simplifiedUI() {
   document.querySelector('.hy-nav-title.new-clickstat').href = 'http://i.huya.com/index.php?m=Subscribe';
   // if(document.querySelector('.player-full-input'))
   //   document.querySelector('.player-full-input').style.display='block';
-  if (document.querySelector('.match-room')) {
-    document.querySelector('.match-room').style.marginLeft = '0';
-    document.querySelector('.match-room').style.maxWidth = contentWidth + 'px';
-  }
 
   let header = document.querySelector('.duya-header-bd.clearfix');
   let newNode = document.createElement('div');
@@ -217,26 +210,31 @@ function openHideChat() {
   // let chatWidth=document.querySelector('.room-core-r').clientWidth;
   // log(chatWidth+'============'+document.querySelector('.room-core-r').clientWidth)
   // log(showChat)
+  let contentWidth = document.body.clientWidth - scrollbarWidth();//屏幕宽度减掉滚动条的宽度
+  let contentHeight = document.body.clientHeight - headerHeight;
+  let giftHeight = document.querySelector('#player-gift-wrap').clientHeight;
+
+  if (document.querySelector('.match-room')) {
+    document.querySelector('.match-room').style.marginLeft = '0';
+    document.querySelector('.match-room').style.maxWidth = contentWidth + 'px';
+  }
+  document.querySelector('.room-core-r').style.height = contentHeight + 'px';
+  document.querySelector('#J_playerMain').style.height = (contentHeight + giftHeight) + 'px';
   if (showChat) {
     let chatWidth = 340;
-    let videoWidth = contentWidth-chatWidth;
+    let videoWidth = contentWidth - chatWidth;
     document.querySelector('.room-core-r').style.display = 'block';
-    document.querySelector('.room-core-r').style.height = contentHeight + 'px';
     document.querySelector('.room-core-r').style.width = chatWidth + 'px';
     document.querySelector('.room-core-l').style.width = videoWidth + 'px';
-    // document.querySelector('.room-core-l').style.height = contentHeight + 'px';
-    document.querySelector('#J_playerMain').style.height = (contentHeight+60) + 'px';
     document.querySelector('.room-core-l').style.marginLeft = '0px';
-    // document.querySelector('.room-core-l').style.marginRight=chatWidth+'px';
     document.querySelector('#pub_msg_input').focus();
     document.querySelector('.player-full-input').style.display = 'none';
   } else {
     let videoWidth = Math.floor(contentHeight / videoScale);
-    let chatWidth = Math.floor(contentWidth - videoWidth);
+    let restWidth = contentWidth - videoWidth;
     document.querySelector('.room-core-r').style.display = 'none';
-    document.querySelector('.room-core-r').style.height = contentHeight + 'px';
     document.querySelector('.room-core-l').style.width = videoWidth + 'px';
-    document.querySelector('.room-core-l').style.marginLeft = (chatWidth / 2) + 'px';
+    document.querySelector('.room-core-l').style.marginLeft = (restWidth / 2) + 'px';
     document.querySelector('.player-full-input').style.display = 'block';
   }
 }
@@ -288,9 +286,13 @@ function registHotKeys() {
 }
 
 function initHtml() {
-  //自动发弹幕界面
-  document.querySelector('.room-chat-tools').append(getIcon('J_roomChatIconBullet', '自动发弹幕', '&#xe622;'));
+  let parent = document.querySelector('.chat-room__wrap');
+  parent.style.overflow = 'hidden';
 
+  document.querySelector('.room-chat-tools').append(getIcon('J_roomChatIconBullet', '自动发弹幕', '&#xe622;'));
+  document.querySelector('.room-chat-tools').append(getIcon('J_roomChatIconSetting', '设置', '&#xe60a;'));
+
+  //自动发弹幕界面
   let html = `
     <div>
       <input id="fireRandom" type="checkbox">
@@ -303,7 +305,7 @@ function initHtml() {
     <div style="width:100%;height:auto;text-align:center;">
       <button id="btnStart" class="cbtn${isFiring ? ' cked' : ''}" style="width:70%">${isFiring ? '停止发送弹幕' : '开始发送弹幕'}</button>
     </div>`;
-  document.querySelector('.chat-room__ft').append(getPanel('J_roomChatBullet', '自动发弹幕', html));
+  parent.append(getPanel('J_roomChatBullet', '自动发弹幕', html));
 
   if (fireData.random) {
     document.querySelector('#fireRandom').checked = true;
@@ -323,7 +325,6 @@ function initHtml() {
   onChecked();
 
   //设置界面
-  document.querySelector('.room-chat-tools').append(getIcon('J_roomChatIconSetting', '设置', '&#xe60a;'));
 
   html = `
     ${getButtonHtml('btnSimplify', '简洁模式', needSimplify)}
@@ -332,13 +333,10 @@ function initHtml() {
     ${getButtonHtml('btnGetExp', '自动领取经验', autoGetExp, !isLogin())}
     ${getButtonHtml('btnAutoBest', '自动选择最高画质', autoBest)}
     <button id="btnAutoGuess" class="cbtn">刷竞猜任务</button>`;
-  document.querySelector('.chat-room__ft').append(getPanel('J_roomChatSetting', '设置', html));
+  parent.append(getPanel('J_roomChatSetting', '设置', html));
 
-  if (!needSimplify) {
-    $('#btnShowChat').attr('disabled', 'disabled');
-  } else {
-    $('#btnShowChat').removeAttr('disabled');
-  }
+  if (!needSimplify) $('#btnShowChat').attr('disabled', 'disabled');
+  else $('#btnShowChat').removeAttr('disabled');
   document.querySelector('#btnSimplify').addEventListener('click', onButtonClick);
   document.querySelector('#btnShowChat').addEventListener('click', onButtonClick);
   document.querySelector('#btnTreasure').addEventListener('click', onButtonClick);
@@ -359,9 +357,13 @@ function getIcon(id, title, icon) {
       return;
     }
     let target = document.querySelector('#' + id.replace('Icon', ''));
-    if (target !== null) {
-      target.className+=target.style.display === 'block'? ' ' : 'block'
-      target.style.display = target.style.display === 'block' ? 'none' : 'block';
+    if (target.style.display === 'none') {
+      target.style.display = 'block';
+      animateCSS(`#${target.id}`, 'fadeInUp');
+    } else {
+      animateCSS(`#${target.id}`, 'fadeOutDown').then((msg) => {
+        target.style.display = 'none';
+      });
     }
   });
   return i;
@@ -380,8 +382,9 @@ function getPanel(id, title, content) {
   panel.className = 'room-panel';
   panel.id = id;
   panel.style.display = 'none';
-  panel.style.width = '99%';
-  panel.style.zIndex = 1;
+  panel.style.width = '100%';
+  panel.style.zIndex = '1';
+  panel.style.bottom = '0';
   panel.innerHTML = html;
 
   return panel;
@@ -394,74 +397,74 @@ function getButtonHtml(id, text, checked, disable = false) {
 function onButtonClick() {
   let isChecked = this.className.indexOf('cked') > 0;
   switch (this.id) {
-  case 'btnSimplify':
-    if (window.confirm('切换显示模式需要刷新网页,是否继续?')) {
-      needSimplify = !isChecked;
-      localStorage.setItem('needSimplify', needSimplify);
-      setTimeout(location.reload(), 1000);
-    } else {
-      return;
-    }
-    break;
-  case 'btnShowChat':
-    showChat = !isChecked;
-    localStorage.setItem('showChat', showChat);
-    openHideChat();
-    if (!showChat) {
-      showMessage('聊天面板关闭后可以点击订阅人数或使用Ctrl+Q热键重新打开', 'info');
-    }
-    break;
-  case 'btnTreasure':
-    autoDigTreasure = !isChecked;
-    localStorage.setItem('autoDigTreasure', autoDigTreasure);
-    if (autoDigTreasure) {
-      digTreasure();
-    } else {
-      clearInterval(digTimer);
-    }
-    break;
-  case 'btnGetExp':
-    autoGetExp = !isChecked;
-    localStorage.setItem('autoGetExp', autoGetExp);
-    if (autoGetExp) {
-      getExp();
-    } else {
-      clearInterval(expTimer);
-    }
-    break;
-  case 'btnAutoBest':
-    autoBest = !isChecked;
-    localStorage.setItem('autoBest', autoBest);
-    if (autoBest) {
-      getBestQuality();
-    } else {
-      clearInterval(bestTimer);
-    }
-    break;
-  case 'btnChp':
-    fireData.chp = !isChecked;
-    localStorage.setItem('fireData', JSON.stringify(fireData));
-    break;
-  case 'btnMrbd':
-    fireData.mrbd = !isChecked;
-    localStorage.setItem('fireData', JSON.stringify(fireData));
-    break;
-  case 'btnDjt':
-    fireData.djt = !isChecked;
-    localStorage.setItem('fireData', JSON.stringify(fireData));
-    break;
-  case 'btnStart':
-    isFiring = !isChecked;
-    this.innerText = isFiring ? '停止发送弹幕' : '开始发送弹幕';
-    if (isFiring) {
-      fire();
-    } else {
-      clearTimeout(stepTimer);
-      clearTimeout(fireTimer);
-    }
-    break;
-  default:
-    break;
+    case 'btnSimplify':
+      if (window.confirm('切换显示模式需要刷新网页,是否继续?')) {
+        needSimplify = !isChecked;
+        localStorage.setItem('needSimplify', needSimplify);
+        setTimeout(location.reload(), 1000);
+      } else {
+        return;
+      }
+      break;
+    case 'btnShowChat':
+      showChat = !isChecked;
+      localStorage.setItem('showChat', showChat);
+      openHideChat();
+      if (!showChat) {
+        showMessage('聊天面板关闭后可以点击订阅人数或使用Ctrl+Q热键重新打开', 'info');
+      }
+      break;
+    case 'btnTreasure':
+      autoDigTreasure = !isChecked;
+      localStorage.setItem('autoDigTreasure', autoDigTreasure);
+      if (autoDigTreasure) {
+        digTreasure();
+      } else {
+        clearInterval(digTimer);
+      }
+      break;
+    case 'btnGetExp':
+      autoGetExp = !isChecked;
+      localStorage.setItem('autoGetExp', autoGetExp);
+      if (autoGetExp) {
+        getExp();
+      } else {
+        clearInterval(expTimer);
+      }
+      break;
+    case 'btnAutoBest':
+      autoBest = !isChecked;
+      localStorage.setItem('autoBest', autoBest);
+      if (autoBest) {
+        getBestQuality();
+      } else {
+        clearInterval(bestTimer);
+      }
+      break;
+    case 'btnChp':
+      fireData.chp = !isChecked;
+      localStorage.setItem('fireData', JSON.stringify(fireData));
+      break;
+    case 'btnMrbd':
+      fireData.mrbd = !isChecked;
+      localStorage.setItem('fireData', JSON.stringify(fireData));
+      break;
+    case 'btnDjt':
+      fireData.djt = !isChecked;
+      localStorage.setItem('fireData', JSON.stringify(fireData));
+      break;
+    case 'btnStart':
+      isFiring = !isChecked;
+      this.innerText = isFiring ? '停止发送弹幕' : '开始发送弹幕';
+      if (isFiring) {
+        fire();
+      } else {
+        clearTimeout(stepTimer);
+        clearTimeout(fireTimer);
+      }
+      break;
+    default:
+      break;
   }
 
   if (isChecked) {
@@ -739,6 +742,28 @@ function showMessage(msg, type) {
   log(msg);
 }
 
+//执行动画
+function animateCSS(element, animation, prefix = 'animate__') {
+  // We create a Promise and return it
+  return new Promise((resolve, reject) => {
+    const animationName = `${prefix}${animation}`;
+    const node = document.querySelector(element);
+
+    node.style.setProperty('--animate-duration', '0.5s');
+    node.classList.add(`${prefix}animated`, animationName);
+
+    // When the animation ends, we clean the classes and resolve the Promise
+    function handleAnimationEnd() {
+      node.classList.remove(`${prefix}animated`, animationName);
+      node.removeEventListener('animationend', handleAnimationEnd);
+
+      resolve('Animation ended');
+    }
+
+    node.addEventListener('animationend', handleAnimationEnd);
+  })
+}
+
 //获取当前时间(可格式化)
 function getDate(format = 'yyyy-MM-dd', addDay = 0) {
   let date = new Date();
@@ -780,12 +805,12 @@ function removeChild(v) {
 //生成从minNum到maxNum的随机数
 function randomNum(minNum, maxNum) {
   switch (arguments.length) {
-  case 1:
-    return parseInt(Math.random() * minNum + 1, 10);
-  case 2:
-    return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-  default:
-    return 0;
+    case 1:
+      return parseInt(Math.random() * minNum + 1, 10);
+    case 2:
+      return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+    default:
+      return 0;
   }
 }
 
