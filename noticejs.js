@@ -45,7 +45,7 @@
 			text: '',
 			type: 'success',
 			position: 'topRight',
-			timeout: 30,
+			timeout: 100,
 			progressBar: true,
 			closeWith: ['button'],
 			animation: null,

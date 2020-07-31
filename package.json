@@ -1,5 +1,5 @@
 {
-  "name": "inhuya",
+  "name": "imhuya",
   "version": "0.0.0",
   "description": "",
   "author": "",
@@ -24,11 +24,12 @@
     "@gera2ld/plaid": "^2.0.5",
     "@gera2ld/plaid-common-react": "^2.0.5",
     "@gera2ld/plaid-rollup": "^2.0.5",
+    "@rollup/plugin-commonjs": "^11.0.2",
     "del-cli": "^3.0.1",
     "husky": "^4.2.5"
   },
   "dependencies": {
     "@babel/runtime": "^7.10.5",
-    "@colecmc/noticejs": "^0.1.2"
+    "rollup": "^1.32.1"
   }
 }
