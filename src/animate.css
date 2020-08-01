@@ -14,7 +14,7 @@
 
 .animate__animated {
   -webkit-animation-duration: 1s;
-  animation-duration: 1s;
+  animation-duration: 0.5s;
   -webkit-animation-duration: var(--animate-duration);
   animation-duration: var(--animate-duration);
   -webkit-animation-fill-mode: both;
