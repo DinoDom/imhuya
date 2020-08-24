@@ -225,7 +225,6 @@ function simplifiedUI() {
       <div class="subscribe-entrance" style="margin:0px">
         <div class="subscribe-hd clickstat sub-on" id="yyliveRk_game_newsBut" eid="click/zhibo/unbook/2222971974" eid_desc="点击/直播间/取消订阅/2222971974">
           <div class="subscribe-control"><em></em>已订阅</div>
-          <div class="subscribe-count" id="activityCount">1185502</div>
         </div>
         <div class="entrance-expand subscribe-expand" style="display:none">
           <em class="entrance-expand-arr"></em>
@@ -238,7 +237,7 @@ function simplifiedUI() {
 
   sub.className = 'room-hd';
   sub.id = 'J_roomHeader';
-  sub.style.width = '152px';
+  sub.style.width = '80px';
   sub.style.height = '30px';
   sub.style.marginTop = (headerHeight - 30) / 2 + 'px';
   sub.style.marginLeft = '10px';
