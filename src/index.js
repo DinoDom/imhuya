@@ -837,27 +837,51 @@ async function sendGift() {
   if (data !== null && !window.confirm('今天好像已经送过虎粮了,还要送?')) return;
   localStorage.removeItem('giftData');
   let rooms = await getRooms();
-  await (async function () {
-    for (let i = 0; i < rooms.length; i++) {
-      let room = rooms[i];
-      showMessage(`开始为 ${room.name} 送虎粮`, 'info');
-      let frame = createFrame(room.id);
-      new Interval(function () {
-        let data = JSON.parse(localStorage.getItem('giftData'));
-        if (data !== null && data[room.id] !== undefined) {
-          frame.remove();
-          showMessage(data[room.id]['result'] ? `成功为 ${room.name} 送出1个虎粮` : `给 ${room.name} 送虎粮是出错了,可能是因为虎粮不足`, data[room.id]['result'] ? 'success' : 'error')
-          this.stop();
-        }
-        if (this.status >= 30) {
-          frame.remove();
-          showMessage(`为 ${room.name} 送虎粮超时,请手动操作`, 'error')
-          this.stop();
-        }
-      }, 'gift' + room.id, 1100);
-      await sleep(1000);
+  doSend(rooms, 0);
+  // await (async function () {
+  //   for (let i = 0; i < rooms.length; i++) {
+  //     let room = rooms[i];
+  //     showMessage(`开始为 ${room.name} 送虎粮`, 'info');
+  //     let frame = createFrame(room.id);
+  //     new Interval(function () {
+  //       let data = JSON.parse(localStorage.getItem('giftData'));
+  //       if (data !== null && data[room.id] !== undefined) {
+  //         frame.remove();
+  //         showMessage(data[room.id]['result'] ? `成功为 ${room.name} 送出1个虎粮` : `给 ${room.name} 送虎粮失败,可能是因为虎粮不足`, data[room.id]['result'] ? 'success' : 'error')
+  //         this.stop();
+  //       }
+  //       if (this.status >= 30) {
+  //         frame.remove();
+  //         showMessage(`为 ${room.name} 送虎粮超时,请手动操作`, 'error')
+  //         this.stop();
+  //       }
+  //     }, 'gift' + room.id, 1100);
+  //     await sleep(1000);
+  //   }
+  // })();
+}
+
+function doSend(rooms, index) {
+  if (rooms === null || rooms === undefined || rooms.length <= 0) return;
+  if (index >= rooms.length) return;
+  let room = rooms[index];
+  showMessage(`开始为 ${room.name} 送虎粮`, 'info');
+  let frame = createFrame(room.id);
+  new Interval(function () {
+    let data = JSON.parse(localStorage.getItem('giftData'));
+    if (data !== null && data[room.id] !== undefined) {
+      frame.remove();
+      doSend(rooms, index+1);
+      showMessage(data[room.id]['result'] ? `成功为 ${room.name} 送出1个虎粮` : `给 ${room.name} 送虎粮失败,可能是因为虎粮不足`, data[room.id]['result'] ? 'success' : 'error')
+      this.stop();
     }
-  })();
+    if (this.status >= 30) {
+      frame.remove();
+      doSend(rooms, index+1);
+      showMessage(`为 ${room.name} 送虎粮超时,请手动操作`, 'error')
+      this.stop();
+    }
+  }, 'gift' + room.id, 1100);
 }
 
 function getRooms() {
