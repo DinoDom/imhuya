@@ -222,7 +222,7 @@ function simplifiedUI() {
   let html = `
   <div class="room-hd-r">
     <div class="host-control J_roomHdCtrl">
-      <div class="subscribe-entrance" style="margin:0px">
+      <div class="subscribe-entrance" style="margin:0;right: 0;top: 0">
         <div class="subscribe-hd clickstat sub-on" id="yyliveRk_game_newsBut" eid="click/zhibo/unbook/2222971974" eid_desc="点击/直播间/取消订阅/2222971974">
           <div class="subscribe-control"><em></em>已订阅</div>
         </div>
@@ -329,7 +329,7 @@ function getElement(key) {
 //注册热键
 function registHotKeys() {
   document.onkeydown = function (e) {
-    log(e.code);
+    log(e.keyCode);
     if (e.keyCode === 81 && e.ctrlKey) {
       switchChat();
     }//切换显示聊天区域
@@ -368,7 +368,7 @@ function registHotKeys() {
       if (isLogin()) {
         getElement(showChat ? '#pub_msg_input' : '#player-full-input-txt').focus();
       }
-    } else if (e.altKey && e.keyCode === 87) {
+    } else if (e.ctrlKey && e.keyCode === 112) {
       if (fireData.bullets.length > 0)
         fireBullet(fireData.bullets[randomNum(0, fireData.bullets.length - 1)]);
       else
@@ -479,7 +479,7 @@ function getPanel(id, title, content) {
     <div class="roomBlockWords-bd" style="padding:5px;word-wrap:break-word;text-align:left;">
       ${content}
     </div>
-    <i class="roomBlockWords-x" onclick="javascript:getElement('#${id.replace('J_roomChat', 'J_roomChatIcon')}').click()"></i>
+    <i class="roomBlockWords-x" onclick="javascript:document.querySelector('#${id.replace('J_roomChat', 'J_roomChatIcon')}').click()"></i>
   </div>`;
   let panel = document.createElement('div');
   panel.className = 'room-panel';
